@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letter Guessing Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        
+        .container {
+            margin: 100px auto;
+            padding: 20px;
+            width: 300px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Letter Guessing Game</h1>
+        <p>Think of a letter from A to Y and click the button to start.</p>
+        <button id="startButton">Start</button>
+        <div id="gameArea" class="hidden">
+            <div id="arrayDisplay"></div>
+            <label id="question"></label>
+            <input type="number" id="userInput" min="1" max="5">
+            <button id="submitButton">Submit</button>
+        </div>
+        <div id="resultArea" class="hidden">
+            <h2>I read your mind you choose the letter : <span id="guessedLetter"></span></h2>
+            <button id="restartButton">Restart</button>
+        </div>
+    </div>
+    <script>
+        document.getElementById('startButton').addEventListener('click', startGame);
+document.getElementById('submitButton').addEventListener('click', handleSubmit);
+document.getElementById('restartButton').addEventListener('click', restartGame);
+
+let array2D, array2DInversed, step = 1;
+let selectedRow;
+
+function startGame() {
+    // Generate letters A to Y, excluding Z
+    const letters = Array.from({length: 25}, (_, i) => String.fromCharCode(65 + i)).filter(l => l !== 'Z');
+    
+    // Shuffle letters
+    letters.sort(() => Math.random() - 0.5);
+    
+    // Create 5x5 array
+    array2D = [];
+    for (let i = 0; i < 5; i++) {
+        array2D.push(letters.slice(i * 5, (i + 1) * 5));
+    }
+    
+    // Create transposed array
+    array2DInversed = array2D[0].map((_, colIndex) => array2D.map(row => row[colIndex]));
+    
+    // Show the first array
+    displayArray(array2D);
+    document.getElementById('question').textContent = 'Which line (1-5) contains your letter?';
+    document.getElementById('gameArea').classList.remove('hidden');
+}
+
+function displayArray(array) {
+    const arrayDisplay = document.getElementById('arrayDisplay');
+    arrayDisplay.innerHTML = '';
+    array.forEach((row, index) => {
+        const rowElement = document.createElement('div');
+        rowElement.textContent = `${index + 1}: ${row.join(' ')}`;
+        arrayDisplay.appendChild(rowElement);
+    });
+}
+
+function handleSubmit() {
+    const userInput = parseInt(document.getElementById('userInput').value);
+    
+    if (isNaN(userInput) || userInput < 1 || userInput > 5) {
+        alert('Please enter a number between 1 and 5');
+        return;
+    }
+    
+    if (step === 1) {
+        selectedRow = userInput;
+        // Clear screen and show transposed array
+        displayArray(array2DInversed);
+        document.getElementById('question').textContent = 'Now, choose the line (1-5) in which your letter is located:';
+        step++;
+    } else if (step === 2) {
+        const guessedLetter = array2D[selectedRow - 1][userInput - 1];
+        document.getElementById('guessedLetter').textContent = guessedLetter;
+        document.getElementById('gameArea').classList.add('hidden');
+        document.getElementById('resultArea').classList.remove('hidden');
+    }
+}
+
+function restartGame() {
+    document.getElementById('resultArea').classList.add('hidden');
+    document.getElementById('gameArea').classList.add('hidden');
+    step = 1;
+}
+
+
+</script>
+</body>
+</html>
